@@ -1,0 +1,20 @@
+{
+  "name": "taskify-agent",
+  "version": "0.0.1",
+  "description": "Taskify AI agent — picks up issues, asks LLMs, posts results",
+  "type": "module",
+  "bin": {
+    "taskify-agent": "./agent.js"
+  },
+  "scripts": {
+    "start": "node agent.js"
+  },
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taskify/agent.git"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
+  }
+}
