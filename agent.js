@@ -39,7 +39,9 @@ if (!ZAI_KEY) {
   process.exit(1)
 }
 
-async function askGLM(prompt) {
+var BASE_SYSTEM_PROMPT = 'You are an AI agent working for a company. You receive issues and tasks. If the answer is simple and factual, just answer directly. If the task requires planning, provide concise actionable steps. Match the depth of your response to the complexity of the issue. Keep responses under 200 words.'
+
+async function askGLM(prompt, agentPrompt) {
   var [kid, secret] = ZAI_KEY.split('.')
   var token = jwt.sign(
     { api_key: kid, exp: Math.floor(Date.now() / 1000) + 3600, timestamp: Date.now() },
@@ -53,7 +55,7 @@ async function askGLM(prompt) {
     body: JSON.stringify({
       model: 'glm-5',
       messages: [
-        { role: 'system', content: 'You are an AI agent working for a company. You receive issues and tasks. If the answer is simple and factual, just answer directly. If the task requires planning, provide concise actionable steps. Match the depth of your response to the complexity of the issue. Keep responses under 200 words.' },
+        { role: 'system', content: BASE_SYSTEM_PROMPT + (agentPrompt ? '\n\n' + agentPrompt : '') },
         { role: 'user', content: prompt }
       ]
     })
@@ -158,7 +160,7 @@ async function run() {
     'Please help with this issue.'
 
   try {
-    var response = await askGLM(prompt)
+    var response = await askGLM(prompt, agent.systemPrompt)
     console.log('[agent] GLM-5 says:\n' + response.slice(0, 200) + (response.length > 200 ? '...' : ''))
 
     // Post comment
