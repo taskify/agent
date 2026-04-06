@@ -63,7 +63,7 @@ async function askGLM(prompt, agentPrompt) {
 
   var data = await res.json()
   if (data.error) throw new Error(data.error.message)
-  return data.choices[0].message.content
+  return { content: data.choices[0].message.content, usage: data.usage || null }
 }
 
 // --- DB helpers ---
@@ -160,8 +160,9 @@ async function run() {
     'Please help with this issue.'
 
   try {
-    var response = await askGLM(prompt, agent.systemPrompt)
-    console.log('[agent] GLM-5 says:\n' + response.slice(0, 200) + (response.length > 200 ? '...' : ''))
+    var result = await askGLM(prompt, agent.systemPrompt)
+    console.log('[agent] GLM-5 says:\n' + result.content.slice(0, 200) + (result.content.length > 200 ? '...' : ''))
+    if (result.usage) console.log('[agent] Tokens: ' + result.usage.total_tokens)
 
     // Post comment
     var commentId = 'comment-' + Date.now()
@@ -170,7 +171,7 @@ async function run() {
       id: commentId, actorType: 'agent', actorId: AGENT_ID,
       action: 'issue.commented', entityType: 'issue', entityId: issue.id,
       agentId: AGENT_ID,
-      details: { comment: response, issueId: issue.id, issueTitle: issue.title },
+      details: { comment: result.content, usage: result.usage, issueId: issue.id, issueTitle: issue.title },
       createdAt: new Date().toISOString()
     })
 
