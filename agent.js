@@ -160,9 +160,11 @@ async function run() {
     'Please help with this issue.'
 
   try {
+    var t0 = Date.now()
     var result = await askGLM(prompt, agent.systemPrompt)
+    var durationMs = Date.now() - t0
     console.log('[agent] GLM-5 says:\n' + result.content.slice(0, 200) + (result.content.length > 200 ? '...' : ''))
-    if (result.usage) console.log('[agent] Tokens: ' + result.usage.total_tokens)
+    if (result.usage) console.log('[agent] Tokens: ' + result.usage.total_tokens + '  Time: ' + (durationMs / 1000).toFixed(1) + 's')
 
     // Post comment
     var commentId = 'comment-' + Date.now()
@@ -171,7 +173,7 @@ async function run() {
       id: commentId, actorType: 'agent', actorId: AGENT_ID,
       action: 'issue.commented', entityType: 'issue', entityId: issue.id,
       agentId: AGENT_ID,
-      details: { comment: result.content, usage: result.usage, issueId: issue.id, issueTitle: issue.title },
+      details: { comment: result.content, usage: result.usage, durationMs: durationMs, issueId: issue.id, issueTitle: issue.title },
       createdAt: new Date().toISOString()
     })
 
